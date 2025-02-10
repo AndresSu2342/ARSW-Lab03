@@ -26,7 +26,9 @@ public class Consumer extends Thread{
         while (true) {
             try {
                 int elem = queue.take(); // Bloquea hasta que haya un elemento disponible
+                System.out.println("------------------------------------------------------------------------------------------");
                 System.out.println("Consumer consumes " + elem);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
