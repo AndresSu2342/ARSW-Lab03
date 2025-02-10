@@ -36,9 +36,27 @@ Sincronización y Dead-Locks.
 
 2. Revise el código e identifique cómo se implemento la funcionalidad antes indicada. Dada la intención del juego, un invariante debería ser que la sumatoria de los puntos de vida de todos los jugadores siempre sea el mismo(claro está, en un instante de tiempo en el que no esté en proceso una operación de incremento/reducción de tiempo). Para este caso, para N jugadores, cual debería ser este valor?.
 
+Tenemos que en el codigo de la clase ControlFrame, que es la encargada de generar la vista de interfaz del juego se tienen 2 atributos que son constantes los cuales representan la vida y el daño por defecto de los jugadores inmortales
+
+![Image](https://github.com/user-attachments/assets/7e5158fe-1f36-4608-9635-9399e417b4ab)
+
+Entonces, para N jugadores, tendriamos que el valor del invariante (la sumatoria de los puntos de vida) es: 100*N 
+
 3. Ejecute la aplicación y verifique cómo funcionan las opción ‘pause and check’. Se cumple el invariante?.
 
+Ejecutamos la aplicacion y tenemos una interfaz sencilla, donde para empezar solo crearemos 3 jugadores inmortales, el boton start nos permite iniciar el juego, tenemos una pantalla de registro de ataques en tiempo real y tenemos el boton pause and check que lo que hace es mostrar la vida actual de los jugadores y su sumatoria, sacamos 3 checkeos para ver si el invariante si se cumple.
+
+![Image](https://github.com/user-attachments/assets/8ec40fbe-0079-4c33-8e83-9337c573ef0e)
+
+![Image](https://github.com/user-attachments/assets/67ee62a0-bf84-45bc-870a-24d50cf5570d)
+
+![Image](https://github.com/user-attachments/assets/8181ed42-391b-47a4-9a5f-4bd81b8b882a)
+
+En los 3 casos tenemos que el invariante no se cumple, ya que la sumatoria de los puntos de vida seria de 300 siempre en este caso, pero tenemos que la sumatoria cambia con cada checkeo aunque si oscila entre el valor esperado.
+
 4. Una primera hipótesis para que se presente la condición de carrera para dicha función (pause and check), es que el programa consulta la lista cuyos valores va a imprimir, a la vez que otros hilos modifican sus valores. Para corregir esto, haga lo que sea necesario para que efectivamente, antes de imprimir los resultados actuales, se pausen todos los demás hilos. Adicionalmente, implemente la opción ‘resume’.
+
+
 
 5. Verifique nuevamente el funcionamiento (haga clic muchas veces en el botón). Se cumple o no el invariante?.
 
