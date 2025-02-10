@@ -90,7 +90,16 @@ Pero al hacerlo varias veces de forma rapida tenemos que esto no siempre se cump
 	}
 	```
 
+Se identifico que la posible region critica en la ejecucion de la pelea de inmortales son las condiciones de carrera en la actualización de puntos de vida:
+
+* Si múltiples hilos (jugadores) están interactuando al mismo tiempo y modificando los puntos de vida de otros jugadores de forma concurrente sin un adecuado control de sincronización, podría ocurrir que los puntos de vida no se actualicen correctamente. Esto podría hacer que la suma total de los puntos de vida no sea precisa.
+- **Ejemplo de condición de carrera:** Si dos jugadores atacan al mismo tiempo a dos jugadores diferentes y actualizan sus puntos de vida, y no hay una sincronización adecuada, uno de esos ataques podría perderse, lo que llevaría a una discrepancia en los cálculos de puntos de vida.
+
+
+
 7. Tras implementar su estrategia, ponga a correr su programa, y ponga atención a si éste se llega a detener. Si es así, use los programas jps y jstack para identificar por qué el programa se detuvo.
+
+
 
 8. Plantee una estrategia para corregir el problema antes identificado (puede revisar de nuevo las páginas 206 y 207 de _Java Concurrency in Practice_).
 
