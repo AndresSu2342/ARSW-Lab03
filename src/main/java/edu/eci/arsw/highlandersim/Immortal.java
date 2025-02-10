@@ -17,6 +17,11 @@ public class Immortal extends Thread {
 
     private final Random r = new Random(System.currentTimeMillis());
 
+    private volatile boolean paused = false;  // Estado de pausa
+
+    private volatile boolean stopped = false; // Estado de parada
+
+
 
     public Immortal(String name, List<Immortal> immortalsPopulation, int health, int defaultDamageValue, ImmortalUpdateReportCallback ucb) {
         super(name);
@@ -29,7 +34,8 @@ public class Immortal extends Thread {
 
     public void run() {
 
-        while (true) {
+        while (!stopped) {
+
             Immortal im;
 
             int myIndex = immortalsPopulation.indexOf(this);
@@ -45,8 +51,18 @@ public class Immortal extends Thread {
 
             this.fight(im);
 
+            synchronized (this) {
+                while (paused) {
+                    try {
+                        wait();  // Espera hasta que se reanude
+                    } catch (InterruptedException e) {
+                        return; // Salir del hilo si es interrumpido
+                    }
+                }
+            }
+
             try {
-                Thread.sleep(1);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -67,6 +83,23 @@ public class Immortal extends Thread {
 
     }
 
+    // Método para poner en pausa el hilo
+    public synchronized void pauseThread() {
+        paused = true;
+    }
+
+    // Método para reanudar el hilo
+    public synchronized void resumeThread() {
+        paused = false;
+        notify();
+    }
+
+    // Método para detener el hilo
+    public synchronized void stopThread() {
+        stopped = true;
+        interrupt();  // Interrumpimos el hilo si está esperando o en un estado bloqueado
+    }
+
     public void changeHealth(int v) {
         health = v;
     }
@@ -74,6 +107,7 @@ public class Immortal extends Thread {
     public int getHealth() {
         return health;
     }
+
 
     @Override
     public String toString() {

@@ -56,9 +56,29 @@ En los 3 casos tenemos que el invariante no se cumple, ya que la sumatoria de lo
 
 4. Una primera hipótesis para que se presente la condición de carrera para dicha función (pause and check), es que el programa consulta la lista cuyos valores va a imprimir, a la vez que otros hilos modifican sus valores. Para corregir esto, haga lo que sea necesario para que efectivamente, antes de imprimir los resultados actuales, se pausen todos los demás hilos. Adicionalmente, implemente la opción ‘resume’.
 
+Para resolver la condicion carrera, primero se definio 2 variables que nos serviran para marcar el estado del hilo que involucra la clase Inmortal, sea que este en ejecucion, pausado o parado, y luego dentro del metodo `run()` se agrego un bloque sincronizado que me permita parar el hilo si la variable de pause este activa.
 
+![Image](https://github.com/user-attachments/assets/b85d99ae-ef10-4649-a266-11a103bce153)
+
+![Image](https://github.com/user-attachments/assets/ed5ddb7d-3dcc-442d-bc67-6330df0939fc)
+
+Con esto implementado, pasamos a la clase ControlFrame donde en el ActionListener del JButton "Pause And Check" agregaremos un ciclo donde por cada hilo ejecute el metodo de `pauseThread()` que solo cambia el estado de la variable pause para que se detenga, esto antes de realizar la suma de los puntos de vida, y por ultimo en el ActionListener del JButton "Resume" se hace el mismo ciclo para poner en reanudacion los hilos con el metodo `resumeThread()`
+
+![Image](https://github.com/user-attachments/assets/bf4a04cb-1d38-41fb-87c0-0797c0802168)
+
+![Image](https://github.com/user-attachments/assets/14f721cc-f2f5-440b-ab2c-d4d744f07064)
 
 5. Verifique nuevamente el funcionamiento (haga clic muchas veces en el botón). Se cumple o no el invariante?.
+
+Al verificar el funcionamiento tenemos que ya muestra el valor esperado del invariante de forma mas seguida
+
+![Image](https://github.com/user-attachments/assets/600711c5-4b5c-4b7d-a71d-de678f697172)
+
+Pero al hacerlo varias veces de forma rapida tenemos que esto no siempre se cumple, ya que sigue presentadose algunas condiciones de carrera que hacen que el valor de la sumatoria aumente o disminuya depende del caso
+
+![Image](https://github.com/user-attachments/assets/9212763a-8ead-4447-9e06-d00a72f0f1e4)
+
+![Image](https://github.com/user-attachments/assets/dfe6074d-7289-40de-a3e6-6c1244baa805)
 
 6. Identifique posibles regiones críticas en lo que respecta a la pelea de los inmortales. Implemente una estrategia de bloqueo que evite las condiciones de carrera. Recuerde que si usted requiere usar dos o más ‘locks’ simultáneamente, puede usar bloques sincronizados anidados:
 
