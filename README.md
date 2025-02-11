@@ -219,8 +219,7 @@ btnResume.addActionListener(new ActionListener() {
 
 5. Verifique nuevamente el funcionamiento (haga clic muchas veces en el botón). Se cumple o no el invariante?.
 
-
-verificar el funcionamiento tenemos que ya muestra el valor esperado del invariante de forma mas seguida
+Verificar el funcionamiento tenemos que ya muestra el valor esperado del invariante de forma mas seguida
 	
 ![Image](https://github.com/user-attachments/assets/600711c5-4b5c-4b7d-a71d-de678f697172)
 	
@@ -243,23 +242,54 @@ usar bloques sincronizados anidados:
 	}
 	```
 
-identifico que la posible region critica en la ejecucion de la pelea de inmortales son las condiciones de carrera en la 
+Se identifico que la posible region critica en la ejecucion de la pelea de inmortales son las condiciones de carrera en la 
 actualización de puntos de vida:
 	
 * Si múltiples hilos (jugadores) están interactuando al mismo tiempo y modificando los puntos de vida de otros jugadores 
 de forma concurrente sin un adecuado control de sincronización, podría ocurrir que los puntos de vida no se actualicen 
 correctamente. Esto podría hacer que la suma total de los puntos de vida no sea precisa.
 
-  - **Ejemplo de condición de carrera:** Si dos jugadores atacan al mismo tiempo a dos jugadores diferentes y actualizan 
-  sus puntos de vida, y no hay una sincronización adecuada, uno de esos ataques podría perderse, lo que llevaría a una 
-  discrepancia en los cálculos de puntos de vida.
+    **Ejemplo de condición de carrera:** Si dos jugadores atacan al mismo tiempo a dos jugadores diferentes y actualizan 
+    sus puntos de vida, y no hay una sincronización adecuada, uno de esos ataques podría perderse, lo que llevaría a una 
+    discrepancia en los cálculos de puntos de vida.
 
+Por lo mismo, recurrimos a nuestro codigo y encontramos que el problema ocurre en la función `fight(Immortal i2)`, donde 
+dos o más hilos pueden modificar la salud de los jugadores al mismo tiempo sin sincronización adecuada.
+Para solucionarlo usamos un bloque anidado `synchronized` para evitar modificaciones concurrentes en la salud de los inmortales.
 
+```java
+public void fight(Immortal i2) {
+Immortal first = this.hashCode() < i2.hashCode() ? this : i2;
+Immortal second = this.hashCode() < i2.hashCode() ? i2 : this;
+
+    synchronized (first) {
+        synchronized (second) {
+            if (i2.getHealth() > 0) {
+                i2.changeHealth(i2.getHealth() - defaultDamageValue);
+                this.health += defaultDamageValue;
+                updateCallback.processReport("Fight: " + this + " vs " + i2 + "\n");
+            } else {
+                updateCallback.processReport(this + " says: " + i2 + " is already dead!\n");
+            }
+        }
+    }
+}
+```
+
+Para evitar deadlocks, siempre se deben adquirir los bloqueos en el mismo orden. Se puede usar la convención de bloquear 
+primero al inmortal con el menor identificador (usando hashCode() o comparando nombres).
 
 7. Tras implementar su estrategia, ponga a correr su programa, y ponga atención a si éste se llega a detener. Si es así, 
 use los programas jps y jstack para identificar por qué el programa se detuvo.
 
+Implementada la estrategia, corremos nuestro programa, verificamos que el invariante se mantenga y miramos si el programa 
+se llega a detener en alguna ejecucion.
 
+![Image](https://github.com/user-attachments/assets/11c6f504-bbd8-4a65-bc60-0593d432972c)
+![Image](https://github.com/user-attachments/assets/71aec92d-9a60-4448-89b6-4b1462fb67d9)
+
+Estos solo fueron algunas pruebas pero aun asi tras varios intentos de ejecucion, el programa nuca se detuvo y si cumplio 
+el invariante en todos los casos pequeños (con 3, 5 y 10 inmortales)
 
 8. Plantee una estrategia para corregir el problema antes identificado (puede revisar de nuevo las páginas 206 y 207 de 
 _Java Concurrency in Practice_).
@@ -268,16 +298,94 @@ _Java Concurrency in Practice_).
 100, 1000 o 10000 inmortales. Si en estos casos grandes se empieza a incumplir de nuevo el invariante, debe analizar lo 
 realizado en el paso 4.
 
+* Caso 100 inmortales
+
+![Image](https://github.com/user-attachments/assets/e886c805-4eea-4824-9b12-b54a34c3f006)
+
+![Image](https://github.com/user-attachments/assets/24ae6a84-8692-4e83-a7af-2627b3071b51)
+
+* Caso 1000 inmortales
+
+![Image](https://github.com/user-attachments/assets/9d43fb66-e2c5-4777-9955-0a811a626391)
+
+![Image](https://github.com/user-attachments/assets/49137a6e-5360-4661-8f46-3e14e05c2415)
+
+* Caso 10000 inmortales
+
+![Image](https://github.com/user-attachments/assets/f849bc1d-7b1b-49bc-b5b3-53490bf4ddbc)
+
+Tenemos que ejecutando los casos mas grandes sigue sin incumplirse el invariante
+
 10. Un elemento molesto para la simulación es que en cierto punto de la misma hay pocos 'inmortales' vivos realizando 
 peleas fallidas con 'inmortales' ya muertos. Es necesario ir suprimiendo los inmortales muertos de la simulación a medida 
 que van muriendo. Para esto:
 	* Analizando el esquema de funcionamiento de la simulación, esto podría crear una condición de carrera? Implemente la 
     funcionalidad, ejecute la simulación y observe qué problema se presenta cuando hay muchos 'inmortales' en la misma. 
     Escriba sus conclusiones al respecto en el archivo RESPUESTAS.txt.
+
 	* Corrija el problema anterior __SIN hacer uso de sincronización__, pues volver secuencial el acceso a la lista 
     compartida de inmortales haría extremadamente lenta la simulación.
 
+Al querer eliminar inmortales muertos de la simulación se nos introduce una condición de carrera porque múltiples hilos 
+pueden acceder y modificar la lista compartida de inmortales al mismo tiempo, esto nos puede traer varios problemas como:
+
+- **Acceso concurrente a la lista de inmortales:** Un hilo puede intentar eliminar un inmortal mientras otro hilo lo está 
+usando en una pelea.
+Esto podría causar excepciones como ConcurrentModificationException si usamos una ArrayList con iteradores.
+
+- **Peleas con inmortales eliminados:** Un hilo puede seleccionar a un oponente justo antes de que otro hilo lo elimine, 
+provocando una pelea con un objeto que ya no está en la lista.
+
+- **Estado inconsistente de la simulación:** Si un hilo intenta recorrer la lista mientras otro la modifica, pueden ocurrir 
+errores de concurrencia o lecturas inconsistentes.
+
+Por lo que tendremos la siguiente implementacion inicial (con problemas)
+
+```java
+public void fight(Immortal i2) {
+    Immortal first = this.hashCode() < i2.hashCode() ? this : i2;
+    Immortal second = this.hashCode() < i2.hashCode() ? i2 : this;
+
+    synchronized (first) {
+        synchronized (second) {
+            if (i2.getHealth() > 0) {
+                i2.changeHealth(i2.getHealth() - defaultDamageValue);
+                this.health += defaultDamageValue;
+                updateCallback.processReport("Fight: " + this + " vs " + i2 + "\n");
+            } else {
+                // Eliminar al inmortal muerto (PUEDE GENERAR ERROR)
+                immortalsPopulation.remove(i2);
+                updateCallback.processReport(this + " says:" + i2 + " is already dead!\n");
+            }
+        }
+    }
+}
+```
+
+Para evitar bloquear la lista con synchronized, podemos usar una CopyOnWriteArrayList, que es una implementación 
+concurrente de List que permite modificaciones sin causar ConcurrentModificationException.
+
+
 11. Para finalizar, implemente la opción STOP.
+
+Para agregar la funcion a este boton, simplemente le agregamos un ActionListener donde detenga la ejecucion de todos los hilos y habilite el boton de "Start" para empezar otro juego
+
+```java
+JButton btnStop = new JButton("STOP");
+btnStop.setForeground(Color.RED);
+
+btnStop.addActionListener(new ActionListener() {
+    public void actionPerformed(ActionEvent e) {
+        for (Immortal im : immortals) {
+            im.stopThread();
+        }
+        immortals.clear();
+        btnStart.setEnabled(true);
+    }
+});
+
+toolBar.add(btnStop);
+```
 
 <!--
 ### Criterios de evaluación

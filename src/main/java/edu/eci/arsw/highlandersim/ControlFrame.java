@@ -28,9 +28,7 @@ public class ControlFrame extends JFrame {
     private static final int DEFAULT_DAMAGE_VALUE = 10;
 
     private JPanel contentPane;
-
     private List<Immortal> immortals;
-
     private JTextArea output;
     private JLabel statisticsLabel;
     private JScrollPane scrollPane;
@@ -126,6 +124,17 @@ public class ControlFrame extends JFrame {
 
         JButton btnStop = new JButton("STOP");
         btnStop.setForeground(Color.RED);
+
+        btnStop.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                for (Immortal im : immortals) {
+                    im.stopThread();
+                }
+                immortals.clear();
+                btnStart.setEnabled(true);
+            }
+        });
+
         toolBar.add(btnStop);
 
         scrollPane = new JScrollPane();
@@ -160,6 +169,13 @@ public class ControlFrame extends JFrame {
             return null;
         }
 
+    }
+
+    public void stopAllImmortals() {
+        for (Immortal immortal : immortals) {
+            immortal.stopThread();
+        }
+        immortals.clear();
     }
 
 }
