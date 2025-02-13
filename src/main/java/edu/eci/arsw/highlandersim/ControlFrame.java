@@ -36,6 +36,7 @@ public class ControlFrame extends JFrame {
 
     /**
      * Launch the application.
+     * Initializes and displays the main frame.
      */
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
@@ -51,7 +52,7 @@ public class ControlFrame extends JFrame {
     }
 
     /**
-     * Create the frame.
+     * Creates the main frame and initializes UI components.
      */
     public ControlFrame() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -66,6 +67,9 @@ public class ControlFrame extends JFrame {
 
         final JButton btnStart = new JButton("Start");
         btnStart.addActionListener(new ActionListener() {
+            /**
+             * Starts the simulation by creating and starting immortal threads.
+             */
             public void actionPerformed(ActionEvent e) {
 
                 immortals = setupInmortals();
@@ -84,6 +88,9 @@ public class ControlFrame extends JFrame {
 
         JButton btnPauseAndCheck = new JButton("Pause and check");
         btnPauseAndCheck.addActionListener(new ActionListener() {
+            /**
+             * Pauses all immortal threads and displays their current health status.
+             */
             public void actionPerformed(ActionEvent e) {
                 for (Immortal im : immortals) {
                     im.pauseThread();
@@ -105,6 +112,9 @@ public class ControlFrame extends JFrame {
         JButton btnResume = new JButton("Resume");
 
         btnResume.addActionListener(new ActionListener() {
+            /**
+             * Resumes all paused immortal threads.
+             */
             public void actionPerformed(ActionEvent e) {
                 for (Immortal im : immortals) {
                     im.resumeThread();
@@ -126,6 +136,9 @@ public class ControlFrame extends JFrame {
         btnStop.setForeground(Color.RED);
 
         btnStop.addActionListener(new ActionListener() {
+            /**
+             * Stops all immortal threads and resets the simulation.
+             */
             public void actionPerformed(ActionEvent e) {
                 for (Immortal im : immortals) {
                     im.stopThread();
@@ -150,6 +163,10 @@ public class ControlFrame extends JFrame {
 
     }
 
+    /**
+     * Initializes a list of immortal objects with default attributes.
+     * @return A list of initialized immortal instances.
+     */
     public List<Immortal> setupInmortals() {
 
         ImmortalUpdateReportCallback ucb=new TextAreaUpdateReportCallback(output,scrollPane);
@@ -171,15 +188,11 @@ public class ControlFrame extends JFrame {
 
     }
 
-    public void stopAllImmortals() {
-        for (Immortal immortal : immortals) {
-            immortal.stopThread();
-        }
-        immortals.clear();
-    }
-
 }
 
+/**
+ * Callback class to update the JTextArea with simulation reports.
+ */
 class TextAreaUpdateReportCallback implements ImmortalUpdateReportCallback{
 
     JTextArea ta;
@@ -191,6 +204,10 @@ class TextAreaUpdateReportCallback implements ImmortalUpdateReportCallback{
     }       
     
     @Override
+    /**
+     * Processes and appends a report to the JTextArea.
+     * @param report The report string to be displayed.
+     */
     public void processReport(String report) {
         ta.append(report);
 

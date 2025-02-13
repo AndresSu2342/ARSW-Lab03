@@ -110,8 +110,8 @@ public class Immortal extends Thread {
                     this.health += defaultDamageValue;
                     updateCallback.processReport("Fight: " + this + " vs " + i2 + "\n");
                 } else {
-                    // Se elimina de manera segura sin problemas de concurrencia
-                    //immortalsPopulation.remove(i2);
+                    // Se elimina de manera segura sin problemas de concurrencia (descomentar linea para eliminar inmortales muertos)
+                    // immortalsPopulation.remove(i2);
                     updateCallback.processReport(this + " says:" + i2 + " is already dead!\n");
                 }
             }

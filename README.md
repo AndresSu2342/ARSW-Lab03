@@ -362,9 +362,33 @@ public void fight(Immortal i2) {
 }
 ```
 
-Para evitar bloquear la lista con synchronized, podemos usar una CopyOnWriteArrayList, que es una implementación 
-concurrente de List que permite modificaciones sin causar ConcurrentModificationException.
+Para evitar bloquear la lista con synchronized, podemos usar Collections.synchronizedList(List<E>) que convierte una lista normal (ArrayList, LinkedList, etc.) en una versión sincronizada. Esta usa bloqueos para garantizar la seguridad en entornos concurrentes
 
+```java
+private static List<Immortal> immortalsPopulation = Collections.synchronizedList(new ArrayList<>());
+```
+
+Ahora con este nuevo tipo de Lista, podemos remover los inmortales que esten muertos de la lista sin tener problemas de concurrencia
+```java
+public void fight(Immortal i2) {
+    Immortal first = this.hashCode() < i2.hashCode() ? this : i2;
+    Immortal second = this.hashCode() < i2.hashCode() ? i2 : this;
+
+    synchronized (first) {
+        synchronized (second) {
+            if (i2.getHealth() > 0) {
+                i2.changeHealth(i2.getHealth() - defaultDamageValue);
+                this.health += defaultDamageValue;
+                updateCallback.processReport("Fight: " + this + " vs " + i2 + "\n");
+            } else {
+                // Se elimina de manera segura sin problemas de concurrencia
+                immortalsPopulation.remove(i2);
+                updateCallback.processReport(this + " says:" + i2 + " is already dead!\n");
+            }
+        }
+    }
+}
+```
 
 11. Para finalizar, implemente la opción STOP.
 
