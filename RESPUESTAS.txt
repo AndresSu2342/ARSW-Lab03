@@ -1,0 +1,9 @@
+Problema: La eliminación de inmortales muertos mientras otros hilos iteran sobre la lista produce
+una condición de carrera, generando errores como ConcurrentModificationException y peleas con
+inmortales que ya fueron eliminados.
+
+Solución incorrecta: Usar synchronized para bloquear el acceso a la lista haría la simulación
+extremadamente lenta.
+
+Solución correcta: Se usó CopyOnWriteArrayList, una lista concurrente que permite modificaciones
+seguras sin bloquear, eliminando la condición de carrera sin afectar el rendimiento.
